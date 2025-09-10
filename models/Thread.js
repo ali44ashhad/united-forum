@@ -74,11 +74,16 @@ const threadSchema = new mongoose.Schema(
 // Pre-save middleware to generate slug
 threadSchema.pre("save", function (next) {
   if (this.isModified("title") || this.isNew) {
-    this.slug = slugify(this.title, {
+    // Create basic slug
+    let baseSlug = slugify(this.title, {
       lower: true,
       strict: true,
       remove: /[*+~.()'"!:@]/g,
     });
+
+    // Add random string to ensure uniqueness
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    this.slug = `${baseSlug}-${randomStr}`;
   }
   next();
 });
