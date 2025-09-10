@@ -47,10 +47,11 @@ const threadSchema = new mongoose.Schema(
     slug: {
       // ✅ NAYA FIELD ADD KAREIN
       type: String,
-      required: true,
+
       unique: true,
       lowercase: true,
       index: true,
+      required: false,
     },
     content: {
       type: String,
