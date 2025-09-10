@@ -95,3 +95,42 @@ exports.createThread = async (req, res) => {
     });
   }
 };
+// ✅ NAYA FUNCTION: Get Thread by Slug
+exports.getThreadBySlug = async (req, res) => {
+  try {
+    const thread = await Thread.findOne({ slug: req.params.slug }).populate(
+      "author",
+      "name"
+    );
+
+    if (!thread) {
+      return res.status(404).json({
+        success: false,
+        message: "Thread not found",
+      });
+    }
+
+    // Increment view count
+    thread.views += 1;
+    await thread.save();
+
+    // Get comments
+    const comments = await Comment.find({ thread: thread._id })
+      .populate("author", "name")
+      .sort({ createdAt: 1 })
+      .lean();
+
+    res.json({
+      success: true,
+      thread: {
+        ...thread.toObject(),
+        comments,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
