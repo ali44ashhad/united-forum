@@ -96,10 +96,10 @@
 //   }
 // };
 
+// controllers/threadController.js
 const Thread = require("../models/Thread");
 const Comment = require("../models/Comment");
 
-// Get threads (paginated)
 exports.getThreads = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -108,7 +108,7 @@ exports.getThreads = async (req, res) => {
     const threads = await Thread.find()
       .populate("author", "name")
       .sort({ createdAt: -1 })
-      .limit(Number(limit))
+      .limit(limit * 1)
       .skip(skip)
       .lean();
 
@@ -122,34 +122,51 @@ exports.getThreads = async (req, res) => {
       total,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// ✅ Get thread by slug
-exports.getThreadBySlug = async (req, res) => {
+exports.getThread = async (req, res) => {
   try {
-    const thread = await Thread.findOne({ slug: req.params.slug }).populate(
-      "author",
-      "name"
-    );
+    const { slug } = req.params;
+
+    const thread = await Thread.findOne({ slug }).populate("author", "name");
 
     if (!thread) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Thread not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Thread not found",
+      });
     }
 
-    // Increment views async
-    Thread.updateOne({ _id: thread._id }, { $inc: { views: 1 } }).exec();
+    // Increment view count
+    thread.views += 1;
+    await thread.save();
 
-    res.json({ success: true, thread });
+    // Fetch comments
+    const comments = await Comment.find({ thread: thread._id })
+      .populate("author", "name")
+      .sort({ createdAt: 1 })
+      .lean();
+
+    res.json({
+      success: true,
+      thread: {
+        ...thread.toObject(),
+        comments,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// Create thread
 exports.createThread = async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -170,6 +187,9 @@ exports.createThread = async (req, res) => {
       thread: populatedThread,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

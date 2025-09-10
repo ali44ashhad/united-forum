@@ -21,7 +21,7 @@
 const express = require("express");
 const {
   getThreads,
-  getThreadBySlug,
+  getThread,
   createThread,
 } = require("../controllers/threadController");
 const { protect } = require("../middleware/auth");
@@ -33,7 +33,7 @@ const {
 const router = express.Router();
 
 router.get("/", getThreads);
-router.get("/slug/:slug", getThreadBySlug); // ✅ fetch by slug
+router.get("/:slug", getThread); // <-- now slug-based
 router.post("/", protect, validateThread, handleValidationErrors, createThread);
 
 module.exports = router;
