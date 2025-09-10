@@ -165,7 +165,6 @@ exports.getThread = async (req, res) => {
     });
   }
 };
-
 // NEW: Get thread by slug
 exports.getThreadBySlug = async (req, res) => {
   try {
@@ -197,33 +196,6 @@ exports.getThreadBySlug = async (req, res) => {
         ...thread.toObject(),
         comments,
       },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-exports.createThread = async (req, res) => {
-  try {
-    const { title, content } = req.body;
-
-    const thread = await Thread.create({
-      title,
-      content,
-      author: req.user.id,
-    });
-
-    const populatedThread = await Thread.findById(thread._id).populate(
-      "author",
-      "name"
-    );
-
-    res.status(201).json({
-      success: true,
-      thread: populatedThread,
     });
   } catch (error) {
     res.status(500).json({

@@ -17,6 +17,7 @@
 // router.post("/", protect, validateThread, handleValidationErrors, createThread);
 
 // module.exports = router;
+
 const express = require("express");
 const {
   getThreads,
