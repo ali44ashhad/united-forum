@@ -1,105 +1,6 @@
-// const Thread = require("../models/Thread");
-// const Comment = require("../models/Comment");
-
-// exports.getThreads = async (req, res) => {
-//   try {
-//     const { page = 1, limit = 10 } = req.query;
-//     const skip = (page - 1) * limit;
-
-//     const threads = await Thread.find()
-//       .populate("author", "name")
-//       .sort({ createdAt: -1 })
-//       .limit(limit * 1)
-//       .skip(skip)
-//       .lean();
-
-//     const total = await Thread.countDocuments();
-
-//     res.json({
-//       success: true,
-//       threads,
-//       totalPages: Math.ceil(total / limit),
-//       currentPage: parseInt(page),
-//       total,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// exports.getThread = async (req, res) => {
-//   try {
-//     const thread = await Thread.findById(req.params.id).populate(
-//       "author",
-//       "name"
-//     );
-
-//     if (!thread) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Thread not found",
-//       });
-//     }
-
-//     // Increment view count
-//     thread.views += 1;
-//     await thread.save();
-
-//     // Get comments
-//     const comments = await Comment.find({ thread: thread._id })
-//       .populate("author", "name")
-//       .sort({ createdAt: 1 })
-//       .lean();
-
-//     res.json({
-//       success: true,
-//       thread: {
-//         ...thread.toObject(),
-//         comments,
-//       },
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// exports.createThread = async (req, res) => {
-//   try {
-//     const { title, content } = req.body;
-
-//     const thread = await Thread.create({
-//       title,
-//       content,
-//       author: req.user.id,
-//     });
-
-//     const populatedThread = await Thread.findById(thread._id).populate(
-//       "author",
-//       "name"
-//     );
-
-//     res.status(201).json({
-//       success: true,
-//       thread: populatedThread,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
 const Thread = require("../models/Thread");
 const Comment = require("../models/Comment");
 
-// Get all threads (paginated)
 exports.getThreads = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -129,7 +30,6 @@ exports.getThreads = async (req, res) => {
   }
 };
 
-// Get a single thread by ID
 exports.getThread = async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id).populate(
@@ -169,47 +69,6 @@ exports.getThread = async (req, res) => {
   }
 };
 
-// Get thread by slug
-exports.getThreadBySlug = async (req, res) => {
-  try {
-    const thread = await Thread.findOne({ slug: req.params.slug }).populate(
-      "author",
-      "name"
-    );
-
-    if (!thread) {
-      return res.status(404).json({
-        success: false,
-        message: "Thread not found",
-      });
-    }
-
-    // Increment view count
-    thread.views += 1;
-    await thread.save();
-
-    // Get comments
-    const comments = await Comment.find({ thread: thread._id })
-      .populate("author", "name")
-      .sort({ createdAt: 1 })
-      .lean();
-
-    res.json({
-      success: true,
-      thread: {
-        ...thread.toObject(),
-        comments,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// Create a new thread
 exports.createThread = async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -217,7 +76,7 @@ exports.createThread = async (req, res) => {
     const thread = await Thread.create({
       title,
       content,
-      author: req.user.id, // make sure req.user is set by your auth middleware
+      author: req.user.id,
     });
 
     const populatedThread = await Thread.findById(thread._id).populate(
